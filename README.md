@@ -56,6 +56,7 @@ The model includes a scope named available that takes a size parameter. This sco
 
 Model: Vehicle
 # app/models/vehicle.rb
+```
 class Vehicle < ApplicationRecord
     enum size: { small: 0, medium: 1, large: 2 }
     belongs_to :parking_slot, optional: true
@@ -141,6 +142,7 @@ class ParkingController < ApplicationController
         parked_time = (Time.now - vehicle.parking_slot.created_at) / 3600 rescue nil # Convert to hours
     end
 end
+```
 The ParkingController handles the parking and unparking of vehicles. It includes several methods to perform these actions.
 
 The assign_slot method takes a vehicle as a parameter and assigns an available parking slot to it. It retrieves the available parking slots for the vehicle using the available_parking_slots method. It then iterates over the available slots and checks if the vehicle can be parked in each slot by calling the can_park_in_slot? method. If a suitable slot is found, it is returned. Otherwise, nil is returned.
@@ -157,6 +159,7 @@ The unpark method takes a vehicle as a parameter and unparks the vehicle from it
 
 Controller: EntrancesController
 # app/controllers/entrances_controller.rb
+```
 class EntrancesController < ApplicationController
     def new
         @entrance = Entrance.new
@@ -180,6 +183,7 @@ class EntrancesController < ApplicationController
         params.require(:entrance).permit(:name, :location, :parking_space_id)
     end
 end
+```
 The EntrancesController handles the creation of entrances for parking spaces. It includes two methods: new and create.
 
 The new method initializes a new Entrance object and fetches all parking spaces from the database to populate a selection dropdown in the view.
@@ -188,6 +192,7 @@ The create method creates a new Entrance object with the permitted parameters fr
 
 Controller: ParkingSpacesController
 # app/controllers/parking_spaces_controller.rb
+```
 class ParkingSpacesController < ApplicationController
     def index
         @parking_spaces = ParkingSpace.includes(parking_slots: :vehicle).all
@@ -305,6 +310,7 @@ class ParkingSpacesController < ApplicationController
         params.require(:parking_space).permit(:number_of_slots)
     end
 end
+```
 The ParkingSpacesController handles the management of parking spaces. It includes several methods to perform various actions related to parking spaces.
 
 The index method retrieves all parking spaces from the database, including their associated parking slots and vehicles. This is done using the includes method to eager load the associations and avoid N+1 queries.
@@ -325,6 +331,7 @@ The create_manual_parking method creates a new Vehicle object with the permitted
 
 Views: index.html.erb
 # app/views/parking_spaces/index.html.erb
+```
 <h1>Parking Information</h1>
 <table border="1">
     <thead>
@@ -361,6 +368,7 @@ Views: index.html.erb
         <% end %>
     </tbody>
 </table>
+```
 The index.html.erb view displays the parking information for all parking spaces. It includes a table with columns for the parking space ID, parking slot ID, vehicle ID, vehicle size, and an action column.
 
 The view iterates over each parking space and its associated parking slots using nested loops. For each parking slot, it displays the parking space ID, parking slot ID, vehicle ID, and vehicle size in separate table cells. It also includes an action column that provides options to pay and unpark the vehicle or manually park a vehicle if it is not already parked.
@@ -369,12 +377,14 @@ The view uses the calculate_parked_time and calculate_fee methods to calculate t
 
 Views: edit_slots.html.erb
 # app/views/parking_spaces/edit_slots.html.erb
+```
 <h1>Edit Slots for Parking Space ID: <%= @parking_space.id %></h1>
 <%= form_with(model: @parking_space, url: update_slots_parking_space_path(@parking_space), method: :patch) do |form| %>
     <%= form.label :number_of_slots %>
     <%= form.number_field :number_of_slots %>
     <%= form.submit 'Update Slots' %>
 <% end %>
+```
 The edit_slots.html.erb view displays a form to edit the number of slots for a parking space. It includes a heading with the parking space ID and a form to update the number of slots.
 
 The view uses the form_with helper to create a form for the @parking_space object. The form is submitted to the update_slots action of the ParkingSpacesController using the update_slots_parking_space_path route helper.
@@ -383,6 +393,7 @@ The form includes a label and number field for the number_of_slots attribute of 
 
 Views: new.html.erb
 # app/views/entrances/new.html.erb
+```
 <h1>Manual Vehicle Parking</h1>
 <%= form_with(model: @vehicle, url: create_manual_parking_path, method: :post) do |form| %>
     <%= form.hidden_field :slot_id, value: @slot_id %>
@@ -390,6 +401,7 @@ Views: new.html.erb
     <%= form.select :size, Vehicle.sizes.keys %>
     <%= form.submit 'Park Vehicle' %>
 <% end %>
+```
 The new.html.erb view displays a form for manual vehicle parking. It includes a heading and a form to select the vehicle size and park the vehicle manually.
 
 The view uses the form_with helper to create a form for the @vehicle object. The form is submitted to the create_manual_parking action of the ParkingSpacesController using the create_manual_parking_path route helper.
@@ -402,6 +414,7 @@ The form also includes a submit button to park the vehicle manually.
 
 Routes: routes.rb
 Rails.application.routes.draw do
+```
   root 'parking_spaces#index'
 
   get '/unpark_and_view_fee', to: 'parking#unpark_and_view_fee', as: :unpark_and_view_fee
@@ -412,6 +425,7 @@ Rails.application.routes.draw do
 
   resources :entrances, only: [:new, :create]
 end
+```
 The routes.rb file defines the routes for the application. It includes routes for the root path, unparking and viewing the fee, deleting a vehicle, and manual parking.
 
 The root path is set to the index action of the ParkingSpacesController, which displays the parking information for all parking spaces.
@@ -428,6 +442,7 @@ The entrances resource is defined with only the new and create actions. These ro
 
 seeds.rb
 # seeds.rb
+```
 # Clear existing data
 Vehicle.delete_all
 ParkingSlot.delete_all
@@ -453,6 +468,7 @@ parking_slots.each_with_index do |slot, index|
   vehicle = Vehicle.create(size: size, parking_slot_id: slot.id)
   slot.update(vehicle_id: vehicle.id) # Associate vehicle with parking slot
 end
+```
 The seeds.rb file is used to populate the database with sample data. It clears any existing data for the Vehicle, ParkingSlot, Entrance, and ParkingSpace models.
 
 It then creates three parking spaces and adjusts the number of slots for each space to 5 using the adjust_slots method.
